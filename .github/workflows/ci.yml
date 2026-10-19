@@ -1,0 +1,37 @@
+name: Spotifree checks
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci_root_password
+          MYSQL_DATABASE: spotifree
+          MYSQL_USER: spotifree
+          MYSQL_PASSWORD: ci_test_password
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost --silent"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+    env:
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: spotifree
+      MYSQL_USER: spotifree
+      MYSQL_PASSWORD: ci_test_password
+      SESSION_SECRET: ci_only_session_secret_1234567890123456
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: npm ci
+      - run: pip install -r requirements.txt
+      - run: npm run check
+      - run: python -m unittest discover -s tests -v
