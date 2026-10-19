@@ -1,0 +1,10 @@
+.env
+*.db
+*.db-*
+__pycache__/
+node_modules/
+.venv/
+.mysql-data/
+.upstream/
+.browser-profile/
+preview.png
